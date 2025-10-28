@@ -1,3 +1,30 @@
+import { Carrito } from "../models/Carrito.js";
+import { CarritoController} from "../controllers/CarritoController.js";
+import { Ticket } from "../models/Ticket.js";
+import { ticketView } from "../views/ticketView.js";
+import { Persona } from "../models/Personas.js";
+
+
+
+export class ticketController{
+    static initTicket() {
+        let carrito = CarritoController.conseguirCarrito();
+
+        const ticket = Ticket.generar(carrito);
+        ticketView.motrarticket(ticket);
+        ticket.guardar();
+        let btnDescargar = document.getElementById("btnConfirmar")
+        btnDescargar.addEventListener("click",()=>convertirHtmlPdf("idPdf"))
+        let btnSalir = document.getElementById("btnSalir")
+        btnSalir.addEventListener("click",()=>{
+
+          window.location.href = "./bienvenida.html";
+          carrito.vaciar();
+          Persona.borrarNombre();
+        })
+  }
+}
+
 export function convertirHtmlPdf(divElement) {
   const original = document.getElementById(divElement);
   const clone = original.cloneNode(true);
