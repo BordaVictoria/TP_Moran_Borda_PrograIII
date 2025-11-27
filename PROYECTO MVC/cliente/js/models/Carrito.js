@@ -7,30 +7,30 @@ export class Carrito {
 
   static crearDesdeLocalStorage(nombreUsuario) {
     const clave = `Carrito_${nombreUsuario}`;
-    const items = JSON.parse(localStorage.getItem(clave)) || [];
+    const items = JSON.parse(sessionStorage.getItem(clave)) || [];
     return new Carrito(nombreUsuario, clave, items);
   }
 
   guardar() {
-    localStorage.setItem(this.clave, JSON.stringify(this.items));
+    sessionStorage.setItem(this.clave, JSON.stringify(this.items));
   }
 
   agregar(producto) {
-    const existente = this.items.find(p => p.id === producto.id);
-    if (existente) {
-      const nuevaCantidad = existente.cantidad + (producto.cantidad || 1);
-      if (nuevaCantidad > existente.stock) return false;
-      existente.cantidad = nuevaCantidad;
-      existente.subtotal = existente.cantidad * existente.precio;
-    } else {
-      this.items.push({
-        ...producto,
-        cantidad: producto.cantidad || 1,
-        subtotal: producto.precio
-      });
-    }
-    this.guardar();
-    return true;
+      const existente = this.items.find(p => p.id === producto.id);
+
+      if (existente) {
+          existente.cantidad += producto.cantidad || 1;
+          existente.subtotal = existente.cantidad * existente.precio;
+      } else {
+          this.items.push({
+              ...producto,
+              cantidad: producto.cantidad || 1,
+              subtotal: (producto.cantidad || 1) * producto.precio
+          });
+      }
+
+      this.guardar();
+      return true;
   }
 
   eliminar(index) {

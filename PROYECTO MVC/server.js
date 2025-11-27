@@ -1,8 +1,10 @@
 import app from "./servidor/src/app/app.js";
 import { sequelize } from "./servidor/src/database/db.js";
 import { crearAdmin } from "./servidor/src/utils/funciones.js"; 
+import dotenv from "dotenv";
+dotenv.config();
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 async function startServer() {
   try {

@@ -1,146 +1,124 @@
 import { ProductosView } from "../views/productosView.js";
 import { Persona } from "../models/Personas.js";
 import { Carrito } from "../models/Carrito.js";
-import { obtenerProductos } from "../api.js";
+import { obtenerProductos } from "../api/productosApi.js";
+import { Paginacion } from "../utils/paginacion.js";
 
 export class ProductosController {
-    static paginaActual = 1;
-    static productosPorPagina = 6;
-    static contenedor = null;
-    static categoriaFiltrada = null;
+
     static carrito = null;
+    static productos = [];
+    static contenedor = null;
+    static paginacion = null;
+    static categoriaFiltrada = null;
 
     static async initProductos() {
-        const nombreUsuario = Persona.obtenerNombre();
-        if (!nombreUsuario) {
+        const usuario = Persona.obtenerNombre();
+        if (!usuario) {
             window.location.href = "bienvenida.html";
             return;
         }
 
-        this.carrito = Carrito.crearDesdeLocalStorage(nombreUsuario);
+        this.carrito = Carrito.crearDesdeLocalStorage(usuario);
         this.contenedor = document.getElementById("productos");
 
-        this.productos = await obtenerProductos();
+        const productos = await obtenerProductos();
+        const disponibles = productos.filter(p => p.stock > 0);
+        this.productos = disponibles;
+
+        this.paginacion = new Paginacion(this.productos, 6);
 
         this.mostrarPagina();
         this.configurarFiltros();
-        this.configurarPaginacion();
-        this.configurarEventosAgregar();
-
+        this.configurarBotonesPaginacion();
+        this.configurarAgregar();
+        
         ProductosView.actualizarContadorCarrito(this.carrito);
     }
 
+    // ---------------- FILTROS ----------------
     static configurarFiltros() {
-        const configurarFiltro = (id, categoria) => {
-            const boton = document.getElementById(id);
-            if (boton) boton.addEventListener("click", () => this.filtrarPorCategoria(categoria));
+        const asignar = (id, categoria) => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener("click", () => this.filtrar(categoria));
         };
 
-        configurarFiltro("filtro-guitarra", "Guitarra");
-        configurarFiltro("filtro-pianos", "Piano");
+        asignar("filtro-guitarra", "Guitarra");
+        asignar("filtro-pianos", "Piano");
+        asignar("filtro-todos", "Todos");
     }
 
-    static configurarPaginacion() {
-        const configurarBoton = (id, accion) => {
-            const boton = document.getElementById(id);
-            if (boton) boton.addEventListener("click", () => this[accion]());
-        };
-
-        configurarBoton("siguiente", "paginaSiguiente");
-        configurarBoton("anterior", "paginaAnterior");
-    }
-
-    static manejarAgregarProducto(card, producto) {
-        const btnAgregar = card.querySelector(".btnAgregar");
-        btnAgregar.style.display = "none";
-
-        const agregado = this.carrito.agregar(producto);
-
-        if (agregado) {
-            const contenedorExistente = card.querySelector("div.mt-2");
-            if (contenedorExistente) contenedorExistente.remove();
-
-            const contenedorBotones = ProductosView.crearContenedorBotones();
-            card.querySelector(".card-body").appendChild(contenedorBotones);
-
-            ProductosView.agregarEventosCard(card, producto, this.carrito);
-
-            ProductosView.actualizarContadorCarrito(this.carrito);
-
+    static filtrar(cat) {
+        if (cat === "Todos") {
+            this.categoriaFiltrada = null;
+            this.paginacion.setItems(this.productos);
         } else {
-            alert(`No hay más stock disponible (${producto.stock})`);
-            btnAgregar.style.display = "block";
+            const filtrados = this.productos.filter(p => p.categoria === cat);
+            this.categoriaFiltrada = filtrados;
+            this.paginacion.setItems(filtrados);
         }
+
+        this.mostrarPagina();
     }
 
-    static configurarEventosAgregar() {
+    // ---------------- PAGINACION ----------------
+    static configurarBotonesPaginacion() {
+        const sig = document.getElementById("siguiente");
+        const ant = document.getElementById("anterior");
+
+        if (sig) sig.addEventListener("click", () => {
+            this.paginacion.siguiente();
+            this.mostrarPagina();
+        });
+
+        if (ant) ant.addEventListener("click", () => {
+            this.paginacion.anterior();
+            this.mostrarPagina();
+        });
+    }
+
+    static mostrarPagina() {
+        const lista = this.paginacion.obtenerPaginaActual();
+
+        ProductosView.mostrarProducto(this.contenedor, lista, this.carrito);
+        this.actualizarIndicadores();
+    }
+
+    static actualizarIndicadores() {
+        const actual = document.getElementById("pagina-actual");
+        const total = document.getElementById("total-paginas");
+
+        if (actual) actual.textContent = this.paginacion.paginaActual;
+        if (total) total.textContent = this.paginacion.totalPaginas();
+    }
+
+    // ---------------- AGREGAR AL CARRITO ----------------
+    static configurarAgregar() {
         this.contenedor.addEventListener("click", (e) => {
             const card = e.target.closest(".card");
             if (!card) return;
 
+            if (!e.target.classList.contains("btnAgregar")) return;
+
             const nombre = card.querySelector(".card-title").textContent.replace("Nombre: ", "");
             const producto = this.productos.find(p => p.nombre === nombre);
-            if (!producto) return;
 
-            e.preventDefault();
-
-            if (e.target.classList.contains("btnAgregar")) {
-                this.manejarAgregarProducto(card, producto);
-            }
+            this.procesarAgregar(card, producto);
         });
     }
 
-    static obtenerListaActual() {
-        return this.categoriaFiltrada || this.productos;
-    }
+    static procesarAgregar(card, producto) {
+        this.carrito.agregar(producto);
 
-    static mostrarPagina() {
-        const inicio = (this.paginaActual - 1) * this.productosPorPagina;
-        const fin = inicio + this.productosPorPagina;
-        const lista = this.obtenerListaActual().slice(inicio, fin);
+        card.querySelector(".btnAgregar").style.display = "none";
 
-        ProductosView.mostrarProducto(this.contenedor, lista, this.carrito);
-        this.actualizarIndicadorPaginas();
-    }
+        const viejo = card.querySelector("div.mt-2");
+        if (viejo) viejo.remove();
 
-    static mostrarTodos() {
-        this.categoriaFiltrada = null;
-        this.paginaActual = 1;
-        this.mostrarPagina();
-    }
+        const contenedorBtn = ProductosView.crearContenedorBotones();
+        card.querySelector(".card-body").appendChild(contenedorBtn);
 
-    static paginaAnterior() {
-        if (this.paginaActual > 1) {
-            this.paginaActual--;
-            this.mostrarPagina();
-        }
-    }
-
-    static paginaSiguiente() {
-        if (this.paginaActual < this.obtenerTotalPaginas()) {
-            this.paginaActual++;
-            this.mostrarPagina();
-        }
-    }
-
-    static obtenerTotalPaginas() {
-        return Math.ceil(this.obtenerListaActual().length / this.productosPorPagina);
-    }
-
-    static filtrarPorCategoria(categoria) {
-        this.categoriaFiltrada = this.productos.filter(p => p.categoria === categoria);
-        this.paginaActual = 1;
-        this.mostrarPagina();
-    }
-
-    static actualizarIndicadorPaginas() {
-        const totalPaginas = this.obtenerTotalPaginas();
-        const actual = document.getElementById("pagina-actual");
-        const total = document.getElementById("total-paginas");
-
-        if (actual && total) {
-            actual.textContent = this.paginaActual;
-            total.textContent = totalPaginas;
-        }
+        ProductosView.agregarEventosCard(card, producto, this.carrito);
+        ProductosView.actualizarContadorCarrito(this.carrito);
     }
 }

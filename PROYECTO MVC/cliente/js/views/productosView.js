@@ -18,10 +18,11 @@ export class ProductosView {
             <p class="card-text">Stock: ${producto.stock}</p>
             <p class="card-text">Categoria: ${producto.categoria}</p>
             <div class="d-flex justify-content-center">
-            <a href="#" class="btn btn-danger boton-card align-items-center btnAgregar">Agregar al carrito</a>
+            <button class="btn btn-danger boton-card align-items-center btnAgregar" type="button">
+              Agregar al carrito
+            </button>
             </div>
-            </div>
-            `;
+        </div>`;
         return card;
     }
 
