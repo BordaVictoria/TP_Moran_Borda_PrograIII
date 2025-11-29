@@ -16,7 +16,7 @@ export function verificarAdmin(req, res, next) {
     const data = jwt.verify(token, process.env.JWT_SECRET);
     req.admin = data; 
     // 3) Token válido → dejar pasar
-    
+    //
     // renueva el token si hace cositas 
     const nuevoToken = jwt.sign(
       { id: data.id, nombre: data.nombre }, 

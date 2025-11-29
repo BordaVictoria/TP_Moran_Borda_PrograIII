@@ -5,8 +5,14 @@ export class FileService {
   static guardarImagen(file) {
     if (!file) return null;
     
-    const destino = path.join("servidor/src/uploads", file.originalname);
+    const timestamp = Date.now();
+    const ext = path.extname(file.originalname);
+    const nombreUnico = `${timestamp}${ext}`;
+    
+    const destino = path.join("servidor/src/uploads", nombreUnico);
     fs.renameSync(file.path, destino);
-    return `/uploads/${file.originalname}`;
+    
+    return `/uploads/${nombreUnico}`;
+
   }
 }

@@ -19,3 +19,4 @@ export function convertirHtmlPdf(divElement) {
 
   html2pdf().set(opciones).from(clone).save();
 }
+// hayque hacer el PDF del lado del servidor 

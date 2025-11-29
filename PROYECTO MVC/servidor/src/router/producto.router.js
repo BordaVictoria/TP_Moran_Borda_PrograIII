@@ -11,7 +11,6 @@ const upload = multer({ dest: "servidor/src/uploads" });
 router.get("/productos", ProductoController.listar);
 router.get("/productos/buscar", ProductoController.buscar);
 
-// OBTENER UNO
 router.get("/productos/:id", verificarAdmin, ProductoController.obtenerUno);
 
 // CREAR
@@ -20,7 +19,7 @@ router.post("/productos", verificarAdmin, upload.single("imgProductos"), Product
 // ACTUALIZAR
 router.post("/productos/:id", verificarAdmin, upload.single("imgProductos"), ProductoController.actualizar);
 
-// ELIMINAR Y ESTADO
+// ELIMINAR Y ESTADO--preguntar
 router.delete("/productos/:id", verificarAdmin, ProductoController.desactivar);
 router.patch("/productos/:id", verificarAdmin, ProductoController.cambiarEstado);
 

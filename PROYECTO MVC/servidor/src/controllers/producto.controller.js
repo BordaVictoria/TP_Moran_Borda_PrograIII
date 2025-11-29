@@ -75,7 +75,7 @@ export class ProductoController {
     }
   }
 
-  static async desactivar(req, res) {
+  static async desactivar(req, res) {// hacer bien si es necesario
     try {
       const { id } = req.params;
       await ProductoService.desactivarProducto(id);

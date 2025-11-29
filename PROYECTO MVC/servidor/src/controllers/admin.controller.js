@@ -65,7 +65,7 @@ export class adminController{
     }
 
     // esto es para postman 
-    static async registrar(req,res){
+static async registrar(req,res){
         try {
             const { nombre, pass } = req.body;
 

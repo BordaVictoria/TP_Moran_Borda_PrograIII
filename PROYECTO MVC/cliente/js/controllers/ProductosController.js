@@ -26,7 +26,7 @@ export class ProductosController {
         const disponibles = productos.filter(p => p.stock > 0);
         this.productos = disponibles;
 
-        this.paginacion = new Paginacion(this.productos, 6);
+        this.paginacion = new Paginacion(this.productos, 8);
 
         this.mostrarPagina();
         this.configurarFiltros();
@@ -92,7 +92,7 @@ export class ProductosController {
         if (total) total.textContent = this.paginacion.totalPaginas();
     }
 
-    // ---------------- AGREGAR AL CARRITO ----------------
+    // al carrito
     static configurarAgregar() {
         this.contenedor.addEventListener("click", (e) => {
             const card = e.target.closest(".card");
