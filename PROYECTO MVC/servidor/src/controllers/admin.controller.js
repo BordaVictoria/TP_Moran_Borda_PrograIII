@@ -10,7 +10,7 @@ export class adminController{
     }
 
     static async dashboard(req,res){
-        res.render("dashboard");
+        res.render("dashboard"); 
     }
 
     static async altaProducto(req,res){

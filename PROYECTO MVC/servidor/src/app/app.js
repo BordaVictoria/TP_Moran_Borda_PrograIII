@@ -28,3 +28,6 @@ app.get(/^(?!\/api|\/uploads|\/admin|\/js).*/, (req, res) => {
   res.sendFile(path.join(process.cwd(), "cliente/pages", "bienvenida.html"));
 });
 export default app;
+
+
+

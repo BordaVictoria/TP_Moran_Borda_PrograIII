@@ -37,7 +37,7 @@ export class ProductosController {
         this.filtrar("Guitarra");
     }
 
-    // ---------------- FILTROS ----------------
+    // FILTROS
     static configurarFiltros() {
         const asignar = (id, categoria) => {
         const btn = document.getElementById(id);
@@ -54,7 +54,7 @@ export class ProductosController {
         this.mostrarPagina();
     }
 
-    // ---------------- PAGINACION ----------------
+    // PAGINACION 
     static configurarBotonesPaginacion() {
         const sig = document.getElementById("siguiente");
         const ant = document.getElementById("anterior");
@@ -85,7 +85,7 @@ export class ProductosController {
         if (total) total.textContent = this.paginacion.totalPaginas();
     }
 
-    // ---------------- AGREGAR AL CARRITO ----------------
+    // AGREGAR AL CARRITO 
     static configurarAgregar() {
         this.contenedor.addEventListener("click", (e) => {
             const card = e.target.closest(".card");
