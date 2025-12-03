@@ -1,24 +1,25 @@
-import { Admin } from "./admin.model.js"; 
-
 import { Venta } from "./ventas.model.js";
 import { VentaItem } from "./ventasItems.model.js";
 import { Producto } from "./producto.model.js";
 
-Venta.hasMany(VentaItem, { foreignKey: "VentaId" });
-VentaItem.belongsTo(Venta, { foreignKey: "VentaId" });
+// RELACIÓN VENTA → ITEMS
+Venta.hasMany(VentaItem, { as: "items", foreignKey: "ventaId" });
+VentaItem.belongsTo(Venta, { foreignKey: "ventaId" });
 
-VentaItem.belongsTo(Producto, { foreignKey: "ProductoId" });
-Producto.hasMany(VentaItem, { foreignKey: "ProductoId" });
+// RELACIÓN PRODUCTO → ITEMS
+Producto.hasMany(VentaItem, { foreignKey: "productoId" });
+VentaItem.belongsTo(Producto, { foreignKey: "productoId" });
 
-// relacion M:M
 Producto.belongsToMany(Venta, {
   through: VentaItem,
-  foreignKey: "ProductoId",
-  otherKey: "VentaId"
+  foreignKey: "productoId",
+  otherKey: "ventaId"
 });
 
 Venta.belongsToMany(Producto, {
   through: VentaItem,
-  foreignKey: "VentaId",
-  otherKey: "ProductoId"
+  foreignKey: "ventaId",
+  otherKey: "productoId"
 });
+
+export { Venta, VentaItem, Producto };

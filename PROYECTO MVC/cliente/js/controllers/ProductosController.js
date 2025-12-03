@@ -23,7 +23,7 @@ export class ProductosController {
         this.contenedor = document.getElementById("productos");
 
         const productos = await obtenerProductos();
-        const disponibles = productos.filter(p => p.stock > 0);
+        const disponibles = productos.filter(p => p.stock > 0 && p.estado === true);
         this.productos = disponibles;
 
         this.paginacion = new Paginacion(this.productos, 6);
@@ -34,30 +34,23 @@ export class ProductosController {
         this.configurarAgregar();
         
         ProductosView.actualizarContadorCarrito(this.carrito);
+        this.filtrar("Guitarra");
     }
 
     // ---------------- FILTROS ----------------
     static configurarFiltros() {
         const asignar = (id, categoria) => {
-            const btn = document.getElementById(id);
-            if (btn) btn.addEventListener("click", () => this.filtrar(categoria));
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener("click", () => this.filtrar(categoria));
         };
-
         asignar("filtro-guitarra", "Guitarra");
         asignar("filtro-pianos", "Piano");
-        asignar("filtro-todos", "Todos");
     }
 
     static filtrar(cat) {
-        if (cat === "Todos") {
-            this.categoriaFiltrada = null;
-            this.paginacion.setItems(this.productos);
-        } else {
-            const filtrados = this.productos.filter(p => p.categoria === cat);
-            this.categoriaFiltrada = filtrados;
-            this.paginacion.setItems(filtrados);
-        }
-
+        const filtrados = this.productos.filter(p => p.categoria === cat);
+        this.categoriaFiltrada = filtrados;
+        this.paginacion.setItems(filtrados);
         this.mostrarPagina();
     }
 

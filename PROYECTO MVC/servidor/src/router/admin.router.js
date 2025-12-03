@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verificarAdmin } from "../utils/middelwareJWT.js";
+import { verificarAdmin } from "../middlewares/verificarAdmin.js";
 import { adminController } from "../controllers/admin.controller.js";
 
 const adminRouter = Router();

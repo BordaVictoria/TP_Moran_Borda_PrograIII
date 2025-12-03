@@ -8,18 +8,15 @@ export class PersonaController {
         const nombre = Persona.obtenerNombre();
         const esBienvenida = window.location.pathname.includes("bienvenida.html");
 
-        // redirecciones automáticas
         if (nombre && esBienvenida) return window.location.href = "/pages/productos.html";
         if (!nombre && !esBienvenida) return window.location.href = "/pages/bienvenida.html";
 
-        // usuario logueado
         if (nombre) {
             view.mostrarSaludo(nombre);
             view.ocultarFormulario();
             return;
         }
 
-        // usuario sin sesión → manejar submit
         view.escucharSubmit((nombreIngresado) => {
             if (!Persona.validar(nombreIngresado)) {
                 view.mostrarAlerta("Por favor, ingrese su nombre");

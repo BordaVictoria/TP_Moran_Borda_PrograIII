@@ -1,24 +1,22 @@
-import { Venta } from "../model/ventas.model.js";
-import { VentaItem } from "../model/ventasItems.model.js";
 import { ProductoService } from "./producto.service.js";
+import { Venta, VentaItem } from "../model/relaciones.model.js";
 
 export class VentaService {
-  static async crearVenta(ventaData) {
-    const { fecha, nombreCliente, total, productos } = ventaData;
-    
+  static async crearVenta({ fecha, nombreCliente, total, productos }) {
+    // Crear la venta
     const venta = await Venta.create({ fecha, nombreCliente, total });
-
-    for (const producto of productos) {
-      await VentaItem.create({
-        VentaId: venta.id,
-        ProductoId: producto.id,
-        cantidad: producto.cantidad,
-        precio: producto.precio,
-        subtotal: producto.subtotal
-      });
-
-      await ProductoService.actualizarStock(producto.id, producto.cantidad);
-    }
+    // Crear los items relacionados y actualizar stock en paralelo
+    await Promise.all(
+      productos.map(p =>
+        VentaItem.create({
+          ventaId: venta.id,
+          productoId: p.id,
+          cantidad: p.cantidad,
+          precio: p.precio,
+          subtotal: p.subtotal
+        }).then(() => ProductoService.actualizarStock(p.id, p.cantidad))
+      )
+    );
 
     return venta;
   }

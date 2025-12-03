@@ -1,38 +1,62 @@
+import { Persona } from "../models/Personas.js";
+import { guardarTicket } from "../api/ventasApi.js";
+
 export class ResumenCarritoView {
+  constructor(contenedor, carrito) {
+    this.contenedor = contenedor;
+    this.carrito = carrito;
+    this.elemento = contenedor;
+  }
 
-    constructor(contenedor, carrito, confirmarCallback) {
-        this.contenedor = contenedor; // div#resumen
-        this.carrito = carrito;
-        this.confirmarCallback = confirmarCallback;
-        this.elemento = this.contenedor; // Con esta referencia apunto al mismo div en HTML
+  render() {
+    this.asignarEventos();
+    this.actualizar();
+  }
+
+  asignarEventos() {
+    const btnFinalizar = this.elemento.querySelector("#finalizarCompra");
+    if (!btnFinalizar) return;
+
+    btnFinalizar.addEventListener("click", () => this.finalizarCompra());
+  }
+
+  async finalizarCompra() {
+    if (this.carrito.items.length === 0) return;
+
+    const cliente = Persona.obtenerNombre();
+    const ticket = {
+      nombreCliente: cliente,
+      fecha: new Date().toISOString(),
+      productos: this.carrito.items,
+      total: this.carrito.calcularTotal()
+    };
+
+    try {
+      const ticketGuardado = await guardarTicket(ticket);
+      ticket.id = ticketGuardado.id;
+      this.limpiarCarrito();
+      window.location.href = `/api/ticket/${ticket.id}`;
+    } catch (err) {
+      console.error(err);
     }
-    // RENDER PRINCIPAL
-    render() {
-        this.asignarEventos();
-        this.actualizar();
-    }
+  }
 
-    // ASIGNAR EVENTOS
-    asignarEventos() {
-        const btnFinalizar = this.elemento.querySelector("#finalizarCompra");
-        if (!btnFinalizar) return;
+  limpiarCarrito() {
+    Persona.borrarNombre();
+    localStorage.clear();
+    sessionStorage.clear();
+    this.carrito.vaciar();
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = () => {
+      window.location.href = "/pages/bienvenida.html";
+    };
+  }
 
-        btnFinalizar.addEventListener("click", () => {
-            if (this.carrito.items.length === 0) return;
-
-            if (this.confirmarCallback) this.confirmarCallback();
-            window.location.href = "./ticket.html";
-        });
-    }
-
-    // ACTUALIZAR VALORES DINÁMICOS
-    actualizar() {
-        if (!this.elemento) return;
-
-        const total = this.carrito.calcularTotal();
-        const formato = `$${total.toFixed(2)}`;
-
-        this.elemento.querySelector(".resumen-subtotal").textContent = formato;
-        this.elemento.querySelector(".resumen-total").textContent = formato;
-    }
+  actualizar() {
+    if (!this.elemento) return;
+    const total = this.carrito.calcularTotal();
+    const formato = `$${total.toFixed(2)}`;
+    this.elemento.querySelector(".resumen-subtotal").textContent = formato;
+    this.elemento.querySelector(".resumen-total").textContent = formato;
+  }
 }

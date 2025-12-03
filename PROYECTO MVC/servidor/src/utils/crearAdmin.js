@@ -1,7 +1,6 @@
 import { Admin } from "../model/admin.model.js";
 import bcrypt from "bcrypt";
 
-// Crear admin por defecto si no existe
 export const crearAdmin = async () => {
   const adminExistente = await Admin.findOne({ where: { nombre: "admin" } });
 
